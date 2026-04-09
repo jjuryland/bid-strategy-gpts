@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뉴엔AI 입찰 전략 분석가 · 지침서 생성기</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #e2ddd8;
+  --border2: #ccc8c2;
+  --text: #1a1814;
+  --muted: #8a857e;
+  --accent: #d4541a;
+  --accent2: #b8430f;
+  --accent-bg: #fff3ee;
+  --green: #1a8a4a;
+  --green-bg: #edfaf4;
+  --red: #c0392b;
+  --red-bg: #fdf0ef;
+  --yellow: #b07d00;
+  --yellow-bg: #fffaed;
+  --preview-bg: #1a1814;
+  --preview-text: #e8e4de;
+  --preview-muted: #6a6560;
+  --preview-border: #2e2a26;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.topbar-logo { font-size: 14px; font-weight: 800; letter-spacing: -0.03em; display: flex; align-items: center; gap: 8px; }
+.topbar-logo .co { color: var(--accent); }
+.topbar-hint { font-size: 11px; color: var(--muted); background: var(--surface2); padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 2px; }
+
+.main { display: grid; grid-template-columns: 430px 1fr; flex: 1; overflow: hidden; }
+
+.form-panel { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; }
+.form-panel::-webkit-scrollbar { width: 3px; }
+.form-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.section { border-bottom: 1px solid var(--border); padding: 20px 22px; }
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+.section-title .num {
+  width: 17px; height: 17px; background: var(--accent); color: white;
+  border-radius: 4px; font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 8px 11px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; font-family: 'Pretendard', sans-serif;
+  font-size: 12px; color: var(--text); outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,84,26,0.1); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+.company-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--accent-bg);
+  border: 1px solid rgba(212,84,26,0.25); border-radius: 10px; margin-bottom: 14px;
+}
+.company-badge .cb-name { font-size: 14px; font-weight: 800; color: var(--accent); }
+.company-badge .cb-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.radio-group { display: flex; gap: 5px; flex-wrap: wrap; }
+.radio-btn {
+  padding: 5px 11px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; background: var(--surface2); color: var(--muted); user-select: none;
+}
+.radio-btn:hover { border-color: var(--border2); color: var(--text); }
+.radio-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+
+.item-grid { display: flex; flex-direction: column; gap: 5px; }
+.lic-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 9px; border: 1px solid var(--border);
+  border-radius: 7px; cursor: pointer; transition: all 0.15s; background: var(--surface2);
+}
+.lic-item:hover { border-color: var(--border2); }
+.lic-item.checked { background: var(--green-bg); border-color: #9fdfc0; }
+.lic-item .chk {
+  width: 15px; height: 15px; border: 2px solid var(--border2); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s; font-size: 9px;
+}
+.lic-item.checked .chk { background: var(--green); border-color: var(--green); color: white; }
+.lic-item .lic-name { font-size: 11px; font-weight: 600; flex: 1; }
+.lic-item .lic-code { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.lic-item .lic-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 12px; padding: 0 2px; transition: color 0.15s; }
+.lic-item .lic-del:hover { color: var(--red); }
+
+/* cert items - always checked style */
+.cert-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 9px; border: 1px solid #9fdfc0;
+  border-radius: 7px; background: var(--green-bg);
+}
+.cert-item .cert-name { font-size: 11px; font-weight: 600; flex: 1; }
+.cert-item .cert-who { font-size: 10px; color: var(--green); font-weight: 600; }
+.cert-item .cert-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 12px; padding: 0 2px; }
+.cert-item .cert-del:hover { color: var(--red); }
+
+.record-list { display: flex; flex-direction: column; gap: 4px; }
+.rec-year-label { font-size: 10px; font-weight: 700; color: var(--muted); margin: 6px 0 3px 2px; }
+.rec-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 7px; background: var(--surface2);
+}
+
+.rec-info { flex: 1; }
+.rec-name { font-size: 11px; font-weight: 700; }
+.rec-meta { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.rec-del { width: 20px; height: 20px; border-radius: 5px; background: var(--red-bg); color: var(--red); border: none; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rec-del:hover { background: #fcdbd9; }
+
+.add-form { background: var(--surface2); border: 1px dashed var(--border2); border-radius: 8px; padding: 11px; margin-top: 8px; }
+.add-form input, .add-form select {
+  width: 100%; padding: 6px 9px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; font-family: 'Pretendard', sans-serif;
+  font-size: 11px; color: var(--text); outline: none;
+}
+.add-form input:focus { border-color: var(--accent); }
+.add-form .row { display: grid; gap: 7px; margin-bottom: 7px; }
+.btn-add { width: 100%; padding: 7px; background: var(--accent); color: white; border: none; border-radius: 6px; font-family: 'Pretendard', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.btn-add:hover { background: var(--accent2); }
+
+.slider-group { display: flex; flex-direction: column; gap: 11px; }
+.slider-row { display: flex; align-items: center; gap: 11px; }
+.slider-label { font-size: 11px; font-weight: 600; width: 74px; flex-shrink: 0; }
+.slider-wrap { flex: 1; }
+.slider-wrap input[type=range] { width: 100%; padding: 0; background: transparent; border: none; box-shadow: none; -webkit-appearance: none; height: 4px; }
+.slider-wrap input[type=range]::-webkit-slider-runnable-track { height: 4px; background: var(--border); border-radius: 2px; }
+.slider-wrap input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); margin-top: -5px; cursor: pointer; }
+.slider-val { font-size: 12px; font-weight: 700; color: var(--accent); width: 36px; text-align: right; flex-shrink: 0; }
+
+.preview-panel { background: var(--preview-bg); display: flex; flex-direction: column; overflow: hidden; }
+.preview-topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 22px; height: 48px; border-bottom: 1px solid var(--preview-border); flex-shrink: 0; }
+.preview-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--preview-muted); display: flex; align-items: center; gap: 8px; }
+.dot-live { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.btn-copy { display: flex; align-items: center; gap: 7px; padding: 7px 16px; background: var(--accent); color: white; border: none; border-radius: 7px; font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+.btn-copy:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-copy.copied { background: var(--green); }
+
+.preview-content { flex: 1; overflow-y: auto; padding: 22px 26px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.85; color: var(--preview-text); white-space: pre-wrap; word-break: break-word; }
+.preview-content::-webkit-scrollbar { width: 3px; }
+.preview-content::-webkit-scrollbar-thumb { background: var(--preview-border); border-radius: 4px; }
+.ph-h1 { color: #f07843; font-weight: 700; }
+.ph-h2 { color: #7ec8e3; }
+.ph-ok { color: #2ecc71; }
+.ph-no { color: #e74c3c; }
+.ph-warn { color: #f1c40f; }
+.ph-star { color: #f5c842; }
+
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--green); color: white; padding: 9px 22px; border-radius: 9px; font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.3s; z-index: 100; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes flashEdit {
+  0%   { box-shadow: 0 0 0 0 rgba(212,84,26,0); background-color: inherit; }
+  20%  { box-shadow: 0 0 0 3px rgba(212,84,26,0.5); background-color: rgba(212,84,26,0.1); }
+  60%  { box-shadow: 0 0 0 3px rgba(212,84,26,0.3); background-color: rgba(212,84,26,0.06); }
+  100% { box-shadow: 0 0 0 0 rgba(212,84,26,0); background-color: inherit; }
+}
+.flash-edit {
+  animation: flashEdit 0.9s ease-out forwards;
+  border-radius: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">⚡ 뉴엔AI 입찰 전략 분석가 <span style="color:#ccc8c2;font-weight:400">·</span> <span class="co">GPTs 지침서 생성기</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button onclick="resetData()" style="display:flex;align-items:center;gap:5px;padding:6px 13px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-family:'Pretendard',sans-serif;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">
+      🔄 초기화
+    </button>
+    <button onclick="saveData()" style="display:flex;align-items:center;gap:5px;padding:6px 13px;background:var(--accent);border:none;border-radius:7px;font-family:'Pretendard',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer" onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">
+      💾 저장하기
+    </button>
+    <div class="topbar-hint">
+      <span style="color:var(--text);font-weight:700">① 입력</span>
+      <span style="color:var(--border2);margin:0 5px">→</span>
+      <span style="color:var(--text);font-weight:700">② 오른쪽 실시간 반영</span>
+      <span style="color:var(--border2);margin:0 5px">→</span>
+      <span style="color:var(--text);font-weight:700">③ 복사</span>
+      <span style="color:var(--border2);margin:0 5px">→</span>
+      <span style="color:var(--accent);font-weight:700">④ GPTs 붙여넣기 ✓</span>
+    </div>
+  </div>
+</div>
+
+<!-- 저장 모달 -->
+<div id="saveModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:16px;padding:28px 32px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">💾</span>
+        <span style="font-size:15px;font-weight:800;color:var(--text)">저장하기</span>
+      </div>
+      <button onclick="document.getElementById('saveModal').style.display='none'"
+        style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 6px;border-radius:5px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>
+    <div id="saveChangelist" style="margin-bottom:16px;max-height:200px;overflow-y:auto"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:18px;padding:8px 12px;background:var(--surface2);border-radius:8px;line-height:1.6">
+      확인을 누르면 현재 브라우저에 저장됩니다.<br>
+      캐시를 삭제하면 초기화됩니다.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('saveModal').style.display='none'"
+        style="flex:1;padding:10px 0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Pretendard',sans-serif">
+        취소
+      </button>
+      <button onclick="confirmSave()"
+        style="flex:2;padding:10px 0;background:var(--accent);border:none;border-radius:9px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:'Pretendard',sans-serif">
+        저장
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 초기화 확인 모달 -->
+<div id="resetModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:16px;padding:28px 32px;max-width:340px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center">
+    <div style="font-size:28px;margin-bottom:10px">🔄</div>
+    <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:8px">초기화할까요?</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px">
+      파일 초기 상태로 되돌립니다.<br>
+      <span style="color:var(--red);font-weight:600">저장된 수정 내용이 모두 사라집니다.</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('resetModal').style.display='none'"
+        style="flex:1;padding:10px 0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Pretendard',sans-serif">
+        취소
+      </button>
+      <button onclick="confirmReset()"
+        style="flex:1;padding:10px 0;background:var(--red);border:none;border-radius:9px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:'Pretendard',sans-serif">
+        초기화
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="form-panel">
+
+    <!-- 1. 기본 정보 -->
+    <div class="section" style="padding:0">
+      <div class="section-title" onclick="toggleSection('sec1','ico1')" style="cursor:pointer;padding:16px 22px;margin:0;user-select:none">
+        <span class="num">1</span> 회사 기본 정보
+        <span id="ico1" style="margin-left:auto;font-size:12px;color:var(--muted)">▶</span>
+      </div>
+      <div id="sec1" style="display:none;padding:0 22px 20px">
+        <div class="company-badge">
+          <span style="font-size:18px">🔒</span>
+          <div>
+            <div class="cb-name">주식회사 뉴엔에이아이</div>
+            <div class="cb-sub">회사명 고정 · 수정 불가</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>기업 형태</label>
+            <select id="bizType" onchange="render()">
+              <option value="중소기업" selected>중소기업</option>
+              <option value="중견기업">중견기업</option>
+              <option value="대기업">대기업</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>상장 여부</label>
+            <select id="listing" onchange="render()">
+              <option value="코스닥 상장사" selected>코스닥 상장</option>
+              <option value="코스피 상장사">코스피 상장</option>
+              <option value="비상장사">비상장</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>신용등급 <span style="font-weight:400;color:var(--muted)">(예: BBB-)</span></label>
+            <input type="text" id="creditGrade" value="BBB-" placeholder="예: BBB-, A+, AA" oninput="render()">
+          </div>
+          <div class="field">
+            <label>핵심 무기 (차별화)</label>
+            <input type="text" id="weapon" value="소셜 빅데이터 분석 솔루션" oninput="render()">
+          </div>
+        </div>
+        <div class="field">
+          <label>강점</label>
+          <input type="text" id="strength" value="빅데이터 솔루션, 상장사 안정성, 장기 신뢰도" oninput="render()">
+        </div>
+        <div class="field">
+          <label>약점</label>
+          <input type="text" id="weakness" value="다량 혹은 롱폼 영상 제작 부담" oninput="render()">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 보유 면허 -->
+    <div class="section" style="padding:0">
+      <div class="section-title" onclick="toggleSection('sec2','ico2')" style="cursor:pointer;padding:16px 22px;margin:0;user-select:none">
+        <span class="num">2</span> 보유 면허
+        <span id="ico2" style="margin-left:auto;font-size:12px;color:var(--muted)">▶</span>
+      </div>
+      <div id="sec2" style="display:none;padding:0 22px 20px">
+        <div class="item-grid" id="licenseGrid"></div>
+        <div class="add-form">
+          <div class="row" style="grid-template-columns:1fr 1fr">
+            <input type="text" id="newLicName" placeholder="면허명">
+            <input type="text" id="newLicCode" placeholder="업종코드 (선택)">
+          </div>
+          <button class="btn-add" onclick="addLicense()">+ 면허 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 보유 자격증 -->
+    <div class="section" style="padding:0">
+      <div class="section-title" onclick="toggleSection('sec3','ico3')" style="cursor:pointer;padding:16px 22px;margin:0;user-select:none">
+        <span class="num">3</span> 보유 자격증 (인력)
+        <span id="ico3" style="margin-left:auto;font-size:12px;color:var(--muted)">▶</span>
+      </div>
+      <div id="sec3" style="display:none;padding:0 22px 20px">
+        <div class="item-grid" id="certGrid"></div>
+        <div class="add-form">
+          <div class="row" style="grid-template-columns:2fr 1fr">
+            <input type="text" id="newCertName" placeholder="자격증명 (예: 어도비 자격증)">
+            <input type="text" id="newCertWho" placeholder="대상 (예: 디자이너 전원)">
+          </div>
+          <button class="btn-add" onclick="addCert()">+ 자격증 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 수행 실적 -->
+    <div class="section" style="padding:0">
+      <div class="section-title" onclick="toggleSection('sec4','ico4')" style="cursor:pointer;padding:16px 22px;margin:0;user-select:none">
+        <span class="num">4</span> 수행 실적 DB
+        <span id="ico4" style="margin-left:auto;font-size:12px;color:var(--muted)">▶</span>
+      </div>
+      <div id="sec4" style="display:none;padding:0 22px 20px">
+        <div class="record-list" id="recordList"></div>
+        <div class="add-form" style="margin-top:8px">
+          <div class="row" style="grid-template-columns:2fr 1fr 1fr">
+            <input type="text" id="recName" placeholder="사업명">
+            <input type="number" id="recAmt" placeholder="금액(천원)">
+            <select id="recYear">
+              <option>2026</option><option>2025</option><option selected>2024</option>
+              <option>2023</option><option>2022</option><option>2021</option><option>2020</option>
+            </select>
+          </div>
+          <div class="row" style="grid-template-columns:1fr 1fr">
+            <input type="text" id="recPeriod" placeholder="기간 (예: 24.01~24.12)">
+            <select id="recType">
+              <option value="공공">공공</option>
+              <option value="민간">민간</option>
+            </select>
+          </div>
+          <button class="btn-add" onclick="addRecord()">+ 실적 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 수익성 단가 기준 -->
+    <div class="section" style="padding:0">
+      <div class="section-title" onclick="toggleSection('sec5','ico5')" style="cursor:pointer;padding:16px 22px;margin:0;user-select:none">
+        <span class="num">5</span> 수익성 판단 단가 기준
+        <span id="ico5" style="margin-left:auto;font-size:12px;color:var(--muted)">▶</span>
+      </div>
+      <div id="sec5" style="display:none;padding:0 22px 20px">
+
+      <!-- 토글 계산식 -->
+      <div style="margin-bottom:14px;margin-top:4px">
+        <button onclick="toggleCalc()" id="calcToggleBtn"
+          style="display:flex;align-items:center;gap:6px;background:var(--accent-bg);border:1px solid rgba(212,84,26,0.25);border-radius:8px;padding:8px 12px;cursor:pointer;width:100%;font-family:'Pretendard',sans-serif;font-size:11px;font-weight:700;color:var(--accent)">
+          <span id="calcToggleIcon">▶</span> <span id="calcToggleText">계산 순서 보기</span>
+        </button>
+        <div id="calcBox" style="display:none;margin-top:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:2.2;color:var(--text)">
+          <div>총 예산 <span style="color:var(--muted)">(RFP 기재, 부가세 포함)</span></div>
+          <div style="padding-left:12px">└ × <span id="calcBidRate" style="color:var(--accent);font-weight:700">92%</span> = <b>우리 투찰금액</b></div>
+          <div style="padding-left:28px">└ − 인건비 <span style="color:var(--muted)">(투찰금액 × <span id="calcLaborRate" style="font-weight:700">50%</span>)</span> = <b>운영 가용 예산</b></div>
+          <div style="padding-left:44px">└ − 외주비 합계</div>
+          <div style="padding-left:60px">└ − 예비비</div>
+          <div style="padding-left:76px">└ = <b style="color:var(--green)">잔여</b> <span style="color:var(--muted)">(플러스 🆗 / 마이너스 ⚠️)</span></div>
+        </div>
+      </div>
+
+      <!-- 투찰률 + 인건비 -->
+      <div class="field-row" style="margin-bottom:14px">
+        <div class="field">
+          <label>투찰률 (%) · 부가세 포함 기준</label>
+          <input type="number" id="bidRate" value="92" min="50" max="100" step="0.1"
+            oninput="document.getElementById('calcBidRate').textContent=this.value+'%';render()">
+        </div>
+        <div class="field">
+          <label>인건비 비율 (투찰금액 대비)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:7px">
+            <input type="range" min="30" max="80" value="50" step="5" id="laborRate"
+              oninput="document.getElementById('laborRateVal').textContent=this.value+'%';document.getElementById('calcLaborRate').textContent=this.value+'%';updateSlider(this);render()"
+              style="flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:linear-gradient(to right, var(--accent) 50%, var(--border) 50%);border:none;padding:0;box-shadow:none;cursor:pointer">
+            <span class="slider-val" id="laborRateVal">50%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 단가 항목 목록 -->
+      <div style="display:flex;flex-direction:column;gap:6px;" id="costGrid"></div>
+
+      <!-- 항목 추가 폼 (순서: 항목명|유형|단가|단위) -->
+      <div class="add-form" style="margin-top:10px">
+        <div class="row" style="grid-template-columns:2fr 1fr 1fr 1fr;margin-bottom:7px">
+          <input type="text" id="newCostName" placeholder="항목명">
+          <select id="newCostType" style="padding:6px 5px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Pretendard',sans-serif">
+            <option value="monthly">월반복</option>
+            <option value="once">반복안함</option>
+            <option value="hold">별도확인</option>
+          </select>
+          <input type="text" id="newCostAmt" placeholder="단가(만원)">
+          <input type="text" id="newCostUnit" placeholder="단위(예:건)">
+        </div>
+        <button class="btn-add" onclick="addCost()">+ 단가 항목 추가</button>
+      </div>
+
+      <!-- 고정 비용 -->
+      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px">고정 비용 항목</div>
+        <div class="field-row">
+          <div class="field">
+            <label>예비비 (만원, 사업 전체 1회)</label>
+            <input type="number" id="reserveCost" value="200" oninput="render()">
+          </div>
+          <div class="field">
+            <label>어워드 비용 (만원, 연 1회)</label>
+            <input type="number" id="awardCost" value="500" oninput="render()">
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 오른쪽 미리보기 -->
+  <div class="preview-panel">
+    <div class="preview-topbar">
+      <div class="preview-label"><span class="dot-live"></span>실시간 지침서 미리보기</div>
+      <button class="btn-copy" id="copyBtn" onclick="copyText()">📋 전체 복사 → GPTs에 붙여넣기</button>
+    </div>
+    <div class="preview-content" id="previewContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ 복사 완료! GPTs 편집창에 붙여넣기 하세요</div>
+
+<!-- 복사 후 모달 -->
+<div id="copyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:16px;padding:28px 32px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center">
+    <div style="font-size:28px;margin-bottom:10px">✅</div>
+    <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">복사 완료!</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6">
+      GPTs 편집창에 붙여넣기 하세요.<br>
+      <span style="color:var(--accent);font-weight:600">디마팀 계정</span>으로 로그인되어 있어야 합니다.
+    </div>
+    <a href="https://chatgpt.com/gpts/editor/g-69853d8d3360819188b6353aefb3ebdd" target="_blank"
+      style="display:block;background:var(--accent);color:white;text-decoration:none;padding:11px 0;border-radius:9px;font-size:13px;font-weight:700;margin-bottom:10px;transition:background 0.15s"
+      onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">
+      🔗 GPTs 편집창 바로가기
+    </a>
+    <button onclick="document.getElementById('copyModal').style.display='none'"
+      style="width:100%;padding:9px 0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Pretendard',sans-serif">
+      닫기
+    </button>
+  </div>
+</div>
+
+<script>
+let licenses = [
+  { name: '동영상제작서비스', code: '8213160301', checked: true },
+  { name: '온라인홍보및방송콘텐츠서비스', code: '8017160201', checked: true },
+  { name: '인터넷지원개발서비스', code: '8111219901', checked: true },
+  { name: '소프트웨어사업자 (디지털콘텐츠개발)', code: '1469', checked: true },
+  { name: '비디오물제작업', code: '3244', checked: true },
+  { name: '광고대행업', code: '9902', checked: true },
+  { name: '출판사신고', code: '1517', checked: true },
+  { name: '디자인서비스', code: '8214150201', checked: false },
+  { name: '산업디자인전문회사', code: '4440/4443/4444', checked: false },
+];
+
+let certs = [
+  { name: '어도비 자격증', who: '디자이너 전원' },
+];
+
+let records = [
+  { name: '전기안전공사 SNS', amt: 120660, year: 2025, period: '25.03.13~25.12.31', type: '공공' },
+  { name: '광주문화재단 SNS', amt: 108000, year: 2025, period: '25.03.10~25.12.31', type: '공공' },
+  { name: '강화군 관광 SNS', amt: 135000, year: 2024, period: '24.02.27~24.12.31', type: '공공' },
+  { name: '안산시 공식 SNS', amt: 108000, year: 2024, period: '24.01.10~24.12.31', type: '공공' },
+  { name: '인천교육청 SNS', amt: 64800, year: 2024, period: '24.04.16~24.12.31', type: '공공' },
+  { name: '신용보증기금', amt: 53400, year: 2024, period: '24.01.01~24.12.31', type: '공공' },
+  { name: '장애인고용공단 SNS', amt: 114800, year: 2023, period: '22.03.03~23.01.31', type: '공공' },
+  { name: '김포시 SNS', amt: 111800, year: 2023, period: '23.01.01~23.12.31', type: '공공' },
+  { name: '써모스푸고 인스타그램', amt: 96000, year: 2023, period: '22.04.01~23.03.31', type: '민간' },
+  { name: '써모스푸고 인스타그램', amt: 96000, year: 2022, period: '21.04.01~22.03.31', type: '민간' },
+  { name: '장애인고용공단 SNS', amt: 79540, year: 2021, period: '21.02.19~21.12.31', type: '공공' },
+];
+const DEFAULT_RECORDS = JSON.parse(JSON.stringify(records));
+
+// 면허
+function renderLicenses() {
+  document.getElementById('licenseGrid').innerHTML = licenses.map((l, i) => `
+    <div class="lic-item ${l.checked ? 'checked' : ''}" onclick="toggleLic(${i})">
+      <div class="chk">${l.checked ? '✓' : ''}</div>
+      <div class="lic-name">${l.name}</div>
+      <div class="lic-code">${l.code}</div>
+      <button class="lic-del" onclick="event.stopPropagation();delLic(${i})">✕</button>
+    </div>`).join('');
+}
+function toggleLic(i) { licenses[i].checked = !licenses[i].checked; renderLicenses(); render(); }
+function delLic(i) { licenses.splice(i,1); renderLicenses(); render(); }
+function addLicense() {
+  const name = document.getElementById('newLicName').value.trim();
+  const code = document.getElementById('newLicCode').value.trim();
+  if (!name) return;
+  licenses.push({ name, code, checked: true });
+  document.getElementById('newLicName').value = '';
+  document.getElementById('newLicCode').value = '';
+  renderLicenses(); render();
+}
+
+// 자격증
+function renderCerts() {
+  document.getElementById('certGrid').innerHTML = certs.length === 0
+    ? '<div style="font-size:11px;color:var(--muted);padding:4px 2px">등록된 자격증 없음</div>'
+    : certs.map((c, i) => `
+      <div class="cert-item">
+        <span style="font-size:13px">🏅</span>
+        <div class="cert-name">${c.name}</div>
+        <div class="cert-who">${c.who}</div>
+        <button class="cert-del" onclick="delCert(${i})">✕</button>
+      </div>`).join('');
+}
+function delCert(i) { certs.splice(i,1); renderCerts(); render(); }
+function addCert() {
+  const name = document.getElementById('newCertName').value.trim();
+  const who = document.getElementById('newCertWho').value.trim();
+  if (!name) return;
+  certs.push({ name, who: who || '전 직원' });
+  document.getElementById('newCertName').value = '';
+  document.getElementById('newCertWho').value = '';
+  renderCerts(); render();
+}
+
+// 실적
+function renderRecords() {
+  const byYear = {};
+  records.forEach((r, i) => { if (!byYear[r.year]) byYear[r.year] = []; byYear[r.year].push({...r, idx: i}); });
+  document.getElementById('recordList').innerHTML =
+    Object.keys(byYear).sort((a,b)=>b-a).map(year => `
+      <div class="rec-year-label">${year}년 준공</div>
+      ${byYear[year].map(r => `
+        <div class="rec-item">
+          <div class="rec-info">
+            <div class="rec-name">${r.name}</div>
+            <div class="rec-meta">${r.amt.toLocaleString()}천원 · ${r.period} · ${r.type}</div>
+          </div>
+          <button class="rec-del" onclick="delRecord(${r.idx})">✕</button>
+        </div>`).join('')}`).join('');
+}
+function delRecord(i) { records.splice(i,1); renderRecords(); render(); }
+function addRecord() {
+  const name = document.getElementById('recName').value.trim();
+  const amt = parseInt(document.getElementById('recAmt').value) || 0;
+  if (!name || !amt) { alert('사업명과 금액을 입력하세요'); return; }
+  records.push({
+    name, amt,
+    year: parseInt(document.getElementById('recYear').value),
+    period: document.getElementById('recPeriod').value.trim(),
+    type: document.getElementById('recType').value
+  });
+  document.getElementById('recName').value = '';
+  document.getElementById('recAmt').value = '';
+  document.getElementById('recPeriod').value = '';
+  renderRecords(); render();
+}
+
+// 단가 데이터
+// type: 'monthly'=월반복, 'once'=반복안함, 'hold'=별도확인필요
+// defaultRule: RFP에 횟수 미명시 시 GPT 행동 지침
+let costs = [
+  { name: '숏폼 제작 (외주)', amt: 50, unit: '건', type: 'monthly', defaultRule: 'RFP에 월 건수 명시 없으면 "확인 필요"로 표기, 추산 금지' },
+  { name: '롱폼 유튜브 영상 제작 (외주)', amt: 300, unit: '건', type: 'monthly', defaultRule: 'RFP에 월 건수 명시 없으면 "확인 필요"로 표기, 추산 금지' },
+  { name: '이벤트 경품', amt: 30, unit: '회', type: 'once', defaultRule: 'RFP에 횟수 미명시 시 연 1회로 추산, (추산) 표기' },
+  { name: '서포터즈/기자단 원고비', amt: 10, unit: '인', type: 'once', defaultRule: 'RFP에서 인원 수 반드시 확인. 미명시 시 "인원 수 확인 필요"로 표기. 단가 범위 5~10만원 중 상한(10만원)으로 보수적 계산' },
+  { name: '인플루언서', amt: 30, unit: '인', type: 'once', defaultRule: '단가 편차 크므로 RFP에서 조건 확인 필수. 미명시 시 "인플루언서 단가 별도 확인 필요"로 표기' },
+  { name: '리플렛 A5 (1천부 기준)', amt: 200, unit: '회', type: 'once', defaultRule: 'RFP에서 부수 확인 후 비례 계산. 부수 미명시 시 1천부 기준 200만원으로 추산, (추산) 표기' },
+];
+
+const typeLabels = { monthly: '월반복', once: '반복안함', hold: '별도확인' };
+const typeColors = { monthly: '#1a8a4a', once: '#b07d00', hold: '#8a857e' };
+
+function renderCosts() {
+  document.getElementById('costGrid').innerHTML = costs.map((c, i) => {
+    const isHold = c.type === 'hold';
+    return `
+    <div style="border:1px solid var(--border);border-radius:8px;background:var(--surface2);padding:8px 10px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:nowrap;overflow:hidden">
+        <input type="text" value="${c.name.replace(/"/g,'&quot;')}" onchange="costs[${i}].name=this.value;render()"
+          style="flex:2;min-width:0;padding:4px 7px;font-size:11px;font-weight:700;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-family:'Pretendard',sans-serif;color:var(--text)">
+        <select onchange="costs[${i}].type=this.value;renderCosts();render()"
+          style="flex-shrink:0;padding:4px 4px;font-size:10px;font-weight:700;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:${typeColors[c.type]};font-family:'Pretendard',sans-serif">
+          <option value="monthly" ${c.type==='monthly'?'selected':''}>월반복</option>
+          <option value="once" ${c.type==='once'?'selected':''}>반복안함</option>
+          <option value="hold" ${c.type==='hold'?'selected':''}>별도확인</option>
+        </select>
+        ${isHold ? `
+          <span style="flex:1"></span>
+          <span style="width:20px"></span>
+        ` : `
+          <input type="text" value="${c.amt}" onchange="costs[${i}].amt=parseInt(this.value)||0;render()"
+            placeholder="단가"
+            style="flex-shrink:0;width:56px;padding:4px 5px;font-size:11px;text-align:right;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-family:'Pretendard',sans-serif;color:var(--text)">
+          <span style="flex-shrink:0;font-size:10px;color:var(--muted)">만원/</span>
+          <input type="text" value="${c.unit}" onchange="costs[${i}].unit=this.value;render()"
+            placeholder="단위"
+            style="flex-shrink:0;width:40px;padding:4px 5px;font-size:10px;background:var(--surface);border:1px solid var(--border);border-radius:5px;font-family:'Pretendard',sans-serif;color:var(--muted)">
+        `}
+        <button onclick="delCost(${i})" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+      </div>
+      <input type="text" value="${c.defaultRule.replace(/"/g,'&quot;')}"
+        onchange="costs[${i}].defaultRule=this.value;render()"
+        placeholder="GPT 행동 지침 (RFP 미명시 시 처리 방법)"
+        style="width:100%;padding:4px 8px;font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;font-family:'Pretendard',sans-serif;box-sizing:border-box">
+    </div>`;
+  }).join('');
+}
+
+// 슬라이더 그라데이션 업데이트
+function updateSlider(el) {
+  const val = (el.value - el.min) / (el.max - el.min) * 100;
+  el.style.background = `linear-gradient(to right, var(--accent) ${val}%, var(--border) ${val}%)`;
+}
+
+function delCost(i) { costs.splice(i,1); renderCosts(); render(); }
+function addCost() {
+  const name = document.getElementById('newCostName').value.trim();
+  const amt = parseInt(document.getElementById('newCostAmt').value) || 0;
+  const unit = document.getElementById('newCostUnit').value.trim() || '건';
+  const type = document.getElementById('newCostType').value;
+  if (!name) return;
+  costs.push({ name, amt, unit, type, defaultRule: '횟수/수량 RFP에서 확인' });
+  document.getElementById('newCostName').value = '';
+  document.getElementById('newCostAmt').value = '';
+  document.getElementById('newCostUnit').value = '';
+  renderCosts(); render();
+}
+
+// ── 로컬 저장 ──────────────────────────────
+const DEFAULTS = {
+  bizType: '중소기업', listing: '코스닥 상장사', creditGrade: 'BBB-',
+  weapon: '소셜 빅데이터 분석 솔루션',
+  strength: '빅데이터 솔루션, 상장사 안정성, 장기 신뢰도',
+  weakness: '다량 혹은 롱폼 영상 제작 부담',
+  bidRate: '92', laborRate: '50', reserveCost: '200', awardCost: '500'
+};
+const DEFAULT_LICENSES = [
+  { name: '동영상제작서비스', code: '8213160301', checked: true },
+  { name: '온라인홍보및방송콘텐츠서비스', code: '8017160201', checked: true },
+  { name: '인터넷지원개발서비스', code: '8111219901', checked: true },
+  { name: '소프트웨어사업자 (디지털콘텐츠개발)', code: '1469', checked: true },
+  { name: '비디오물제작업', code: '3244', checked: true },
+  { name: '광고대행업', code: '9902', checked: true },
+  { name: '출판사신고', code: '1517', checked: true },
+  { name: '디자인서비스', code: '8214150201', checked: false },
+  { name: '산업디자인전문회사', code: '4440/4443/4444', checked: false },
+];
+const DEFAULT_CERTS = [{ name: '어도비 자격증', who: '디자이너 전원' }];
+const DEFAULT_COSTS = [
+  { name: '숏폼 제작 (외주)', amt: 50, unit: '건', type: 'monthly', defaultRule: 'RFP에 월 건수 명시 없으면 "확인 필요"로 표기, 추산 금지' },
+  { name: '롱폼 유튜브 영상 제작 (외주)', amt: 300, unit: '건', type: 'monthly', defaultRule: 'RFP에 월 건수 명시 없으면 "확인 필요"로 표기, 추산 금지' },
+  { name: '이벤트 경품', amt: 30, unit: '회', type: 'once', defaultRule: 'RFP에 횟수 미명시 시 연 1회로 추산, (추산) 표기' },
+  { name: '서포터즈/기자단 원고비', amt: 10, unit: '인', type: 'once', defaultRule: 'RFP에서 인원 수 반드시 확인. 미명시 시 "인원 수 확인 필요"로 표기. 단가 범위 5~10만원 중 상한(10만원)으로 보수적 계산' },
+  { name: '인플루언서', amt: 30, unit: '인', type: 'once', defaultRule: '단가 편차 크므로 RFP에서 조건 확인 필수. 미명시 시 "인플루언서 단가 별도 확인 필요"로 표기' },
+  { name: '리플렛 A5 (1천부 기준)', amt: 200, unit: '회', type: 'once', defaultRule: 'RFP에서 부수 확인 후 비례 계산. 부수 미명시 시 1천부 기준 200만원으로 추산, (추산) 표기' },
+];
+
+// 마지막 저장 기준값 (비교용)
+let lastSaved = null;
+
+function getCurrentSnapshot() {
+  const fields = {};
+  Object.keys(DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) fields[id] = el.value;
+  });
+  return { fields, licenses: JSON.parse(JSON.stringify(licenses)), certs: JSON.parse(JSON.stringify(certs)), records: JSON.parse(JSON.stringify(records)), costs: JSON.parse(JSON.stringify(costs)) };
+}
+
+const FIELD_LABELS = {
+  bizType: '기업 형태', listing: '상장 여부', creditGrade: '신용등급',
+  weapon: '핵심 무기', strength: '강점', weakness: '약점',
+  bidRate: '투찰률', laborRate: '인건비 비율', reserveCost: '예비비', awardCost: '어워드 비용'
+};
+
+function saveData() {
+  const current = getCurrentSnapshot();
+  const changes = [];
+
+  // 필드 비교
+  if (lastSaved) {
+    Object.keys(DEFAULTS).forEach(id => {
+      const prev = lastSaved.fields[id] ?? DEFAULTS[id];
+      const curr = current.fields[id];
+      if (prev !== curr) {
+        const unit = id === 'bidRate' || id === 'laborRate' ? '%' : id.includes('Cost') ? '만원' : '';
+        changes.push(`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+          <span style="color:var(--muted);width:90px;flex-shrink:0">${FIELD_LABELS[id] || id}</span>
+          <span style="color:var(--red);text-decoration:line-through">${prev}${unit}</span>
+          <span style="color:var(--muted)">→</span>
+          <span style="color:var(--green);font-weight:700">${curr}${unit}</span>
+        </div>`);
+      }
+    });
+    // 단가 비교
+    current.costs.forEach((c, i) => {
+      const p = lastSaved.costs[i];
+      if (!p) { changes.push(`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--green);font-weight:700">+ ${c.name} 추가됨</span></div>`); return; }
+      if (p.amt !== c.amt) changes.push(`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="color:var(--muted);width:90px;flex-shrink:0">${c.name}</span>
+        <span style="color:var(--red);text-decoration:line-through">${p.amt}만원</span>
+        <span style="color:var(--muted)">→</span>
+        <span style="color:var(--green);font-weight:700">${c.amt}만원</span>
+      </div>`);
+      if (p.type !== c.type) changes.push(`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="color:var(--muted);width:90px;flex-shrink:0">${c.name} 유형</span>
+        <span style="color:var(--red);text-decoration:line-through">${typeLabels[p.type]}</span>
+        <span style="color:var(--muted)">→</span>
+        <span style="color:var(--green);font-weight:700">${typeLabels[c.type]}</span>
+      </div>`);
+    });
+    if (lastSaved.costs.length > current.costs.length) {
+      changes.push(`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--red)">− 단가 항목 ${lastSaved.costs.length - current.costs.length}개 삭제됨</span></div>`);
+    }
+    // 실적 비교
+    if (JSON.stringify(lastSaved.records) !== JSON.stringify(current.records)) {
+      changes.push(`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--yellow)">수행 실적 DB 변경됨</span></div>`);
+    }
+    // 면허 비교
+    if (JSON.stringify(lastSaved.licenses) !== JSON.stringify(current.licenses)) {
+      changes.push(`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--yellow)">보유 면허 변경됨</span></div>`);
+    }
+  }
+
+  const listEl = document.getElementById('saveChangelist');
+  if (!lastSaved) {
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--muted);padding:8px 0">📋 첫 저장입니다.</div>`;
+  } else if (changes.length === 0) {
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--muted);padding:8px 0">변경된 항목이 없습니다.</div>`;
+  } else {
+    listEl.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">변경된 항목 (${changes.length}개)</div>` + changes.join('');
+  }
+
+  const modal = document.getElementById('saveModal');
+  modal.style.display = 'flex';
+  modal.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
+}
+
+function confirmSave() {
+  const current = getCurrentSnapshot();
+  localStorage.setItem('bidGPTs_v1', JSON.stringify({ fields: current.fields, licenses, certs, records, costs }));
+  lastSaved = current;
+  document.getElementById('saveModal').style.display = 'none';
+}
+
+function loadData() {
+  const raw = localStorage.getItem('bidGPTs_v1');
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    if (data.fields) {
+      Object.keys(data.fields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = data.fields[id];
+      });
+    }
+    if (data.licenses) licenses = data.licenses;
+    if (data.certs) certs = data.certs;
+    if (data.records) records = data.records;
+    if (data.costs) costs = data.costs;
+    return true;
+  } catch(e) { return false; }
+}
+
+function resetData() {
+  const modal = document.getElementById('resetModal');
+  modal.style.display = 'flex';
+  modal.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
+}
+
+function confirmReset() {
+  localStorage.removeItem('bidGPTs_v1');
+  document.getElementById('resetModal').style.display = 'none';
+  // 디폴트값 복원
+  Object.keys(DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = DEFAULTS[id];
+  });
+  licenses = JSON.parse(JSON.stringify(DEFAULT_LICENSES));
+  certs = JSON.parse(JSON.stringify(DEFAULT_CERTS));
+  records = JSON.parse(JSON.stringify(DEFAULT_RECORDS));
+  costs = JSON.parse(JSON.stringify(DEFAULT_COSTS));
+  renderLicenses(); renderCerts(); renderRecords(); renderCosts();
+  const laborEl = document.getElementById('laborRate');
+  updateSlider(laborEl);
+  document.getElementById('laborRateVal').textContent = laborEl.value + '%';
+  render();
+}
+// ────────────────────────────────────────────
+function flash(el) {
+  if (!el) return;
+  el.classList.remove('flash-edit');
+  void el.offsetWidth; // reflow로 애니메이션 리셋
+  el.classList.add('flash-edit');
+  setTimeout(() => el.classList.remove('flash-edit'), 900);
+}
+function flashById(id) { flash(document.getElementById(id)); }
+
+// 섹션 토글
+function toggleSection(secId, icoId) {
+  const sec = document.getElementById(secId);
+  const ico = document.getElementById(icoId);
+  const isOpen = sec.style.display !== 'none';
+  sec.style.display = isOpen ? 'none' : 'block';
+  ico.textContent = isOpen ? '▶' : '▼';
+}
+
+// 계산식 토글
+function toggleCalc() {
+  const box = document.getElementById('calcBox');
+  const icon = document.getElementById('calcToggleIcon');
+  const txt = document.getElementById('calcToggleText');
+  const isOpen = box.style.display !== 'none';
+  box.style.display = isOpen ? 'none' : 'block';
+  icon.textContent = isOpen ? '▶' : '▼';
+  txt.textContent = isOpen ? '계산 순서 보기' : '계산 순서 닫기';
+}
+
+// 라디오
+function setRadio(gid, el) {
+  document.querySelectorAll(`#${gid} .radio-btn`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function getRadio(gid) {
+  return document.querySelector(`#${gid} .radio-btn.active`)?.textContent || '';
+}
+
+// 지침서 생성
+function buildGuide() {
+  const bizType = document.getElementById('bizType').value;
+  const listing = document.getElementById('listing').value;
+  const credit = document.getElementById('creditGrade').value;
+  const weapon = document.getElementById('weapon').value.trim() || '[핵심 무기]';
+  const strength = document.getElementById('strength').value.trim() || '-';
+  const weakness = document.getElementById('weakness').value.trim() || '-';
+  const laborRate = document.getElementById('laborRate').value;
+  const bidRate = document.getElementById('bidRate').value || '92';
+  const reserveCost = document.getElementById('reserveCost').value || '200';
+  const awardCost = document.getElementById('awardCost').value || '500';
+  const labor = 65;
+  const outsource = 20;
+  const other = 10;
+  const profit = 5;
+  const chLim = '3개';
+  const sw = '+20%';
+
+  const licOk = licenses.filter(l => l.checked);
+  const licNo = licenses.filter(l => !l.checked);
+
+  const byYear = {};
+  records.forEach(r => { if (!byYear[r.year]) byYear[r.year] = []; byYear[r.year].push(r); });
+  let recSection = '';
+  let idx = 1;
+  Object.keys(byYear).sort((a,b)=>b-a).forEach(year => {
+    recSection += `\n**${year}년 준공:**\n`;
+    byYear[year].forEach(r => {
+      recSection += `${idx}. ${r.name} (${r.amt.toLocaleString()}천원) ${r.period} ${r.type}\n`;
+      idx++;
+    });
+  });
+
+  const certSection = certs.length > 0
+    ? certs.map(c => `- ${c.name}: ${c.who}`).join('\n')
+    : '- 해당 없음';
+
+  const certForStep4 = certs.length > 0
+    ? certs.map(c => `   - ${c.who} ${c.name} 보유 → RFP에 해당 평가 기준 있을 때만 강점으로 반영`).join('\n')
+    : '   - 등록된 자격증 없음';
+
+  return `# 🎯 역할 정의
+당신은 주식회사 뉴엔에이아이의 공공기관 입찰 전략 최고 책임자입니다.
+제안요청서(RFP) 분석을 통해 입찰 참여 여부를 판단하고 수주 전략을 수립합니다.
+
+**매 분석 시작 시 반드시 "✅ 회사 마스터 데이터베이스를 확인했습니다" 메시지를 출력하세요.**
+
+---
+
+# 🏢 회사 마스터 데이터베이스 (분석 시 항상 최우선 참조)
+다음 정보는 모든 분석에서 기본 전제로 사용하며, 사용자 입력보다 우선 확인한다.
+단, 사용자가 이 데이터를 수정하거나 최신 정보로 정정하면 그 내용을 우선 반영한다.
+
+## 1. 기본 현황
+- **기업형태:** ${bizType} (확인서 보유), ${listing}
+- **신용평가등급:** 회사채 ${credit}
+- **조직:** ${certSection}
+- **핵심 무기:** ${weapon}
+
+## 2. 보유 자격 및 면허 (${new Date().getFullYear()}년 기준. 이후 추가된 게 있다면 지침서 수정하라고 말하기)
+
+**[등록 완료 ✅]**
+${licOk.length > 0 ? licOk.map(l => `- ${l.name}${l.code ? ' (' + l.code + ')' : ''}`).join('\n') : '- 해당 없음'}
+
+**[미등록 ❌]**
+${licNo.length > 0 ? licNo.map(l => `- ${l.name}${l.code ? ' (' + l.code + ')' : ''}`).join('\n') : '- 해당 없음'}
+
+## 3. 사업 수행 실적 DB (VAT 포함, 준공시점 기준)
+**⚠️ 핵심 로직:** 실적 인정 연도는 수행기간 종료일(준공일) 기준
+${recSection}
+## 4. 핵심 역량
+**강점:** ${strength}
+**약점:** ${weakness}
+
+---
+
+# 🔍 분석 프로세스 (6단계 필수)
+
+## STEP 1: 입찰 참가 자격 검증 ✅
+- ${bizType} 요건, 직접생산확인증명서(특히 8213160301) 확인
+- **판정:** [참가 가능 ✅ / 불가능 ❌] 명확히 제시
+
+## STEP 2: 과업 범위 요약 📋
+RFP를 분석하여 아래 형식으로 정리하세요. 난이도 판단이나 코멘트는 하지 않습니다.
+
+**[과업 범위 요약]**
+- 채널: ○○, ○○, ○○(미러링)
+- 월 콘텐츠: 약 ○건 (기획 필요 ○건 / 미러링 ○건)
+- 특이사항: 현장취재, 숏폼, 이벤트 등 포함 여부
+- 외주 검토 필요 항목: ○○ (해당 없으면 "없음")
+
+※ 콘텐츠 수가 RFP에 명시되지 않은 경우 "확인 필요"로 표시
+※ 운영 가능 여부 판단은 담당자가 합니다.
+
+## STEP 3: 정량평가 자동 계산 📊
+⚠️ 정량평가 점수는 반드시 RFP 내 배점표 기준으로 계산
+배점표가 명확하지 않을 경우: "확인 필요"로 표시
+
+1. **실적 기준 파악:** 최근 3년/5년, 금액 하한, VAT 포함/제외, 준공 기준
+2. **VAT 계산:** "제외" 명시 시 계약금액 ÷ 1.1
+3. **실적 매칭:** 위 DB에서 조건 맞는 건수 필터링
+4. **신용등급 계산 원칙:**
+   - 기본표 기준 우선 적용 (당사 회사채 ${credit})
+   - "중소기업"과 "소기업·소상공인·창업기업"은 구분한다
+   - 배점한도 예외(만점 부여)는 RFP에 명시된 소기업·소상공인·창업기업에만 적용하며, 중소기업 확인만으로 적용하지 않는다
+   - 소기업/소상공인 여부가 DB에 없으면 기본점수로 산정하고, 별도 증빙 확인 전까지 상향 적용 금지
+   - 불명확하면 보수적으로 산정
+
+## STEP 4: 정성평가 포인트 분석 🎯
+⚠️ 이 단계는 RFP 분석 시 수행하지 않습니다.
+사용자가 "전략 가이드" 를 요청할 때만 평가항목별 어필 포인트 / 신경 쓸 부분을 출력하세요.
+
+## STEP 5: 예산 및 수익성 계산 💰
+⚠️ 반드시 수행. 생략 금지. 출력 형식 5번 표에 전부 기재.
+
+**⭐ 최우선 원칙: RFP에 수량·횟수·인원이 명시된 경우, 아래 단가 기준표의 기본값보다 RFP 수치를 절대 우선한다. 단가 기준표는 RFP에 명시가 없을 때만 적용하는 기본값이다.**
+
+**⭐ 항목 포함 원칙: RFP 과업에 명시된 항목만 계산한다. 단가 기준표에 있더라도 RFP에 없는 항목은 외주비에 절대 포함하지 않는다.**
+
+1. **투찰금액 계산:** RFP 총 예산(부가세 포함 금액 기준) × ${bidRate}% = 투찰금액
+2. **인건비 선공제:** 투찰금액 × ${laborRate}% = 인건비 → 운영 가용 예산 = 투찰금액 - 인건비
+3. **외주비 항목별 계산:** 단가 기준표 유형별 규칙 엄수
+   - 【월반복】: 단가 × 월수량 × 사업개월수 (연단위 일괄 곱 절대 금지)
+   - 【반복안함】: 단가 × 횟수 (월로 환산 절대 금지)
+   - 【별도확인】: 추산 금지, "별도 확인 필요" 표기
+4. **잔여 계산:** 운영 가용 예산 - 외주비 합계 - 예비비 - 어워드(해당 시)
+5. **판정:** 잔여 마이너스 → ⚠️ 경고 필수 출력
+
+## STEP 6: 종합 판정 🚦
+아래 3가지만으로 판단하여 출력 형식 6번 표에 작성:
+1. **자격 요건** — 미달 시 무조건 참여 불가 ❌
+2. **정량 경쟁력** — 실적·신용등급 점수 기준
+3. **정성 경쟁력** — 유리한 항목 vs 신경 쓸 항목 종합
+
+⚠️ 운영 부담(STEP 2)은 판정에 반영하지 않습니다.
+
+---
+
+# 📤 출력 형식 (반드시 준수)
+
+## ⚠️ 출력 분량 제한 (절대 준수)
+- 전체 답변은 A4 2장 분량을 넘지 않는다
+- 각 표의 셀은 1~2줄 이내로 작성
+- 설명문, 부연, 나열은 금지. 표와 한 줄 코멘트만 허용
+
+## 🔎 0. 자체 점검 (출력 전 수행, 출력하지 않음)
+- 실적 연도가 준공일 기준인가?
+- VAT 처리가 RFP 조건과 일치하는가?
+- 자격 요건 미달 항목을 빠뜨리지 않았는가?
+- 정성평가 상세를 RFP 분석 단계에서 출력하지 않았는가?
+- 운영 부담이 최종 판정에 영향을 주지 않았는가?
+- 추산값에 근거를 명시했는가?
+- **수익성 계산(STEP 5)을 수행하고 출력 형식 5번 표에 기재했는가? → 생략 시 재수행**
+- **순이익이 마이너스인 경우 경고를 출력했는가?**
+
+## ✅ 회사 정보 확인
+"✅ 회사 마스터 데이터베이스를 확인했습니다" (한 줄로만)
+
+## 📋 1. 입찰 개요
+
+| 항목 | 내용 |
+|------|------|
+| 사업명 | |
+| 발주기관 | |
+| 예산 | |
+| 기간 | |
+| 계약방법 | |
+| 핵심 과업 | (3줄 이내 요약) |
+
+## 📋 2. 과업 범위 요약
+
+| 항목 | 내용 |
+|------|------|
+| 채널 구성 | |
+| 월 콘텐츠 | 약 ○건 (기획 ○건 / 미러링 ○건) |
+| 특이사항 | |
+| 외주 검토 필요 | |
+
+※ RFP에 월 건수가 명시되지 않은 경우 추산값으로 표시하고 반드시 근거를 함께 명시할 것
+예: "약 6건 (인스타그램 70편/년 ÷ 12개월 기준 추산, RFP 직접 명시 아님)"
+
+## ✅ 3. 자격 검증
+
+| 요건 | 충족 여부 | 비고 |
+|------|---------|------|
+| 중소기업 확인서 | ✅ / ❌ | |
+| 면허 요건 | ✅ / ❌ | |
+| 인력 요건 | ✅ / ❌ | |
+| 기타 | | |
+
+**판정: 참가 가능 ✅ / 불가능 ❌**
+
+## 📊 4. 정량평가
+
+| 항목 | 배점 | 당사 점수 | 비고 |
+|------|------|---------|------|
+| 신용등급 (${credit}) | | | |
+| 수행실적 | | | RFP 기준 명시 |
+| 합계 | | | |
+
+배점표 없을 경우 → "배점 확인 필요"로 표시
+
+## 💰 5. 예산 및 수익성
+
+| 항목 | 금액 | 비고 |
+|------|------|------|
+| RFP 총 예산 | | VAT 포함/제외 명시 |
+| 투찰금액 (×${bidRate}%) | | |
+| 인건비 (×${laborRate}%) | | 투찰금액 기준 |
+| 운영 가용 예산 | | 투찰금액 - 인건비 |
+| 외주비 합계 | | 항목별 내역 아래 기재 |
+| 예비비 | ${parseInt(reserveCost).toLocaleString()}만원 | 고정 |
+| 어워드 | ${parseInt(awardCost).toLocaleString()}만원 또는 해당없음 | |
+| **잔여** | | **마이너스 시 ⚠️ 경고** |
+| 수익성 판정 | | [여유 ✅ / 타이트 🟡 / 적자 ❌] |
+
+**외주비 내역:**
+| 과업 항목 | 유형 | 단가 | 수량 | 소계 |
+|---------|------|------|------|------|
+| (RFP 과업 기반 작성) | 월반복/반복안함 | | | (추산 시 근거 명시) |
+
+※ 별도확인 항목은 표 하단에 "○○: 별도 확인 필요" 로 나열
+
+## 🚦 6. 최종 판정
+
+**판정: [적극 추천 ✅ / 조건부 추천 🟡 / 참여 불가 ❌]**
+
+| 판정 근거 | 내용 |
+|---------|------|
+| 자격 요건 | ✅ 충족 여부 + 확인 필요 사항 |
+| 정량 경쟁력 | 신용등급 점수 + 실적 점수 + 한 줄 해석 |
+| 정성 경쟁력 | 우리가 유리한 항목 / 신경 써야 할 항목 (각 1줄) |
+| 주요 리스크 | 자격·경쟁·과업 중 핵심 1~2개만 |
+
+**한 줄 총평:** ~
+
+※ 운영 부담은 판정에 반영하지 않음
+※ 본 분석은 참고용이며, 최종 판단은 담당자가 합니다.
+
+## ⚠️ 7. 리스크
+
+| 리스크 항목 | 내용 |
+|-----------|------|
+| 자격 | |
+| 과업 | |
+| 경쟁 | |
+
+## 💬 8. 다음 단계 (Go 시에만 출력)
+
+**참여 결정 시 아래 두 가지 중 선택하세요:**
+
+1. **경쟁사 분석** → 나라장터 낙찰 이력 + 기존 채널 현황을 주시면 바로 분석합니다.
+
+2. **전략 방향 & 자료조사 가이드** → 이 사업 수주를 위한 핵심 전략과 조사해야 할 자료 목록을 정리해드립니다.
+
+전략 가이드에는 다음이 포함됩니다:
+- 평가항목별 어필 포인트 / 신경 쓸 부분 (정성평가 상세)
+- 승부처 및 핵심 전략 방향
+- 조사해야 할 자료 목록 (발주처 채널, 경쟁사 포트폴리오, 벤치마킹 사례 등)
+
+※ 외부 환경 데이터(생활체육 참여율, 트렌드 리포트, 관련 뉴스 등)는 GPT가 제공하기 어렵습니다. 필요 시 통계청·문화체육관광부·관련 보도자료를 별도로 수집하여 제안서 전용 GPT에 함께 업로드하세요.
+
+📌 제안서 작성은 제안서 전용 GPT를 활용하세요.
+저는 입찰 분석 전문이라 매 대화마다 회사 정보를 새로 읽어야 해서 제안서 작성엔 속도가 느립니다.
+제안서 전용 GPT는 뉴엔에이아이 기존 수주 제안서를 학습한 상태라, 우리 스타일과 실적을 바탕으로 훨씬 빠르고 정확하게 뼈대를 잡아줍니다.
+
+✅ 권장 순서
+1. 여기서 전략 가이드 받기
+2. 자료조사 (발주처 채널, 경쟁사 포트폴리오 등)
+3. [전략 가이드 + 조사 자료] 묶어서 제안서 전용 GPT에 업로드
+
+---
+
+# 💰 수익성 판단 기준
+
+## 계산 순서 (반드시 이 순서로 수행)
+1. **투찰금액** = RFP 총 예산 × ${bidRate}%
+2. **인건비** = 투찰금액 × ${laborRate}% → 투찰금액에서 먼저 차감
+3. **운영 가용 예산** = 투찰금액 - 인건비
+4. **외주비 합계** = 아래 단가 기준표 참고하여 과업별 계산
+5. **잔여** = 운영 가용 예산 - 외주비 합계 - 예비비(${parseInt(reserveCost).toLocaleString()}만원) - 어워드(해당 시 ${parseInt(awardCost).toLocaleString()}만원)
+6. **잔여 마이너스 시 즉시 ⚠️ 경고**
+
+## 외주 단가 기준표
+${costs.map(c => {
+  if (c.type === 'hold') return `- **${c.name}**: 판단 보류 — ${c.defaultRule}`;
+  const typeLabel = c.type === 'monthly' ? '【월반복】' : '【반복안함】';
+  return `- **${c.name}** ${typeLabel}: ${c.amt.toLocaleString()}만원/${c.unit} — ${c.defaultRule}`;
+}).join('\n')}
+
+## 고정 비용
+- **예비비**: ${parseInt(reserveCost).toLocaleString()}만원 (사업 전체 1회 고정)
+- **어워드**: ${parseInt(awardCost).toLocaleString()}만원 (연 1회 고정 — RFP에 명시 없어도 어워드 과업 포함 시 적용)
+
+## 유형별 계산 규칙 (절대 혼용 금지)
+- **【월반복】**: 단가 × 월 수량 × 사업 기간(개월 수) — 절대 연단위로 일괄 곱하지 않음
+- **【반복안함】**: 단가 × 횟수(또는 인원) — 절대 월로 환산하지 않음
+- **【별도확인】**: 단가 추산 금지, 해당 행에 "별도 확인 필요 — 판단 보류" 표기
+
+## 모델비
+- RFP에 모델 등장 조건 포함 시 → "모델비 별도 확인 필요 — 판단 보류"로 표기
+
+---
+
+# 🚫 절대 금지 사항
+
+❌ 미보유 면허를 보유했다고 가정
+❌ 자격 미달인데 "참여 가능" 판단
+❌ DB에 없는 실적 추가/부풀리기
+❌ "100% 수주" 등 보장성 표현
+❌ VAT 포함/제외 구분 무시
+❌ 리스크 숨기고 무조건 "Go"
+❌ 담합, 허위 증빙 등 불법 행위 조언
+❌ 표 형식 무시하고 긴 문장으로 출력
+❌ 운영 부담을 Go/No 판정에 반영
+❌ 경쟁사 분석 요청 시 입찰 개요, 자격 검증 등 이전 분석 내용 반복 출력 → 경쟁사 분석 결과만 바로 출력
+❌ RFP 분석 단계에서 평가항목별 정성평가 상세 출력 → 전략 가이드 요청 시에만 출력
+❌ 추산값을 근거 없이 확정 수치처럼 표기 → 반드시 "(추산, 근거: ~)" 명시
+❌ 수익성 계산 생략 → 예산 요약만 하고 수익성을 안 쓰는 것은 금지. 반드시 투찰금액·인건비·잔여까지 계산해서 5번 표에 기재
+❌ 월반복 항목을 연단위로 일괄 곱하거나, 반복안함 항목을 월로 환산하는 것 금지
+
+✅ 자격 미달 또는 잔여 마이너스 발견 시 즉시 경고
+✅ 배점표 없을 경우 "확인 필요"로 표시
+✅ 모든 계산은 근거 명시
+
+---
+
+이제 제안요청서를 업로드하거나 질문해주세요!`;
+}
+
+// 미리보기
+function render() {
+  const text = buildGuide();
+  let html = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^(# .+)$/gm, '<span class="ph-h1">$1</span>')
+    .replace(/^(## .+)$/gm, '<span class="ph-h2">$1</span>')
+    .replace(/^(### .+)$/gm, '<span class="ph-h2">$1</span>')
+    .replace(/(✅[^\n]*)/g, '<span class="ph-ok">$1</span>')
+    .replace(/(❌[^\n]*)/g, '<span class="ph-no">$1</span>')
+    .replace(/(⚠️[^\n]*)/g, '<span class="ph-warn">$1</span>')
+    .replace(/(★[^\n]*)/g, '<span class="ph-star">$1</span>')
+    .replace(/(\*\*[^*\n]+\*\*)/g, '<strong style="color:#e8e4de">$1</strong>');
+  document.getElementById('previewContent').innerHTML = html;
+}
+
+// 복사
+function copyText() {
+  navigator.clipboard.writeText(buildGuide()).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ 복사 완료!';
+    btn.classList.add('copied');
+    // 모달 표시
+    const modal = document.getElementById('copyModal');
+    modal.style.display = 'flex';
+    // 모달 바깥 클릭 시 닫기
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    setTimeout(() => {
+      btn.innerHTML = '📋 전체 복사 → GPTs에 붙여넣기';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+// 초기화
+loadData(); // 저장된 데이터 있으면 불러오기
+renderLicenses();
+renderCerts();
+renderRecords();
+renderCosts();
+// 슬라이더 초기 그라데이션
+const laborEl = document.getElementById('laborRate');
+updateSlider(laborEl);
+laborEl.addEventListener('input', () => updateSlider(laborEl));
+render();
+// 로드 후 기준값 세팅 (변경내역 비교용)
+lastSaved = getCurrentSnapshot();
+</script>
+</body>
+</html>
